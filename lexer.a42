@@ -1,0 +1,2628 @@
+%    A lexical analyzer (written in Automata42) for scanning preprocessed C11 source files
+%    Copyright (C) 2022  Somdipto Chakraborty
+%
+%    This program is free software: you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation, either version 3 of the License, or
+%    (at your option) any later version.
+%
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%    GNU General Public License for more details.
+%
+%    You should have received a copy of the GNU General Public License
+%    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+task "#include<stdio.h>"
+
+state_lex_failed char {
+  *: -state_lex_failed;
+}
+
+state_encoding_prefix char {
+  '"': task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'u':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'L':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'U':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_':; '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fputc(s[*p],stdout);" -state_identifier;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - identifier\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - identifier\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('!',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - identifier\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - identifier\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_encoding_prefix_u8 char {
+  '"': task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'u':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'L':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'U':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_':; '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fputc(s[*p],stdout);" -state_identifier;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - identifier\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - identifier\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - identifier\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - identifier\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_encoding_prefix_u char {
+  '8': task "fputc('8',stdout);" -state_encoding_prefix_u8;
+
+  '"': task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'u':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'L':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'U':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_':; '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':;
+  '9': task "fputc(s[*p],stdout);" -state_identifier;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - identifier\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - identifier\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - identifier\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - identifier\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_maybe_hexadecimal_escape_sequence_character_constant char {
+  '\\\'':; '"':; '?':; '\\\\':; 'a':;
+  'b':; 'f':; 'n':; 'r':; 't':; 'v': -state_character_constant;
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7': task "fputc(s[*p],stdout);" -state_octal_escape_sequence_character_constant;
+
+  'x': task "fputc('x',stdout);" -state_hexadecimal_escape_sequence_character_constant;
+
+  'u': task "fputc(s[*p],stdout);" -state_u_universal_character_name_character_constant;
+
+  'U': task "fputc(s[*p],stdout);" -state_U_universal_character_name_character_constant;
+
+  *: task "fprintf(stderr, \"invalid escape-sequence \\\\%c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_rec_hexadecimal_escape_sequence_character_constant char {
+  '\\\\': task "fputc('\\\\',stdout);" -state_maybe_hexadecimal_escape_sequence_character_constant;
+
+  '\\\'': task "fprintf(stdout,\"' - constant (character-constant)\\n\");" -state_pending;
+
+  *: task "fputc(s[*p],stdout);" -state_character_constant;
+}
+
+state_hexadecimal_escape_sequence_character_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_rec_hexadecimal_escape_sequence_character_constant;
+
+  *: task "fprintf(stderr,\"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_u_hex_quad_3_character_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_character_constant;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_u_hex_quad_2_character_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_u_hex_quad_3_character_constant;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_u_hex_quad_1_character_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_u_hex_quad_2_character_constant;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_u_universal_character_name_character_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_u_hex_quad_1_character_constant;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_7_character_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_character_constant;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_6_character_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_7_character_constant;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_5_character_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_6_character_constant;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_4_character_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_5_character_constant;
+
+  *: task "fprintf(stderr, \"expected a hex-quad; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_3_character_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_4_character_constant;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_2_character_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_3_character_constant;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_1_character_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_2_character_constant;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_universal_character_name_character_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_1_character_constant;
+
+  *: task "fprintf(stderr, \"expected a hex-quad; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_octal_escape_sequence_character_constant2 char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7': task "fputc(s[*p],stdout);" -state_character_constant;
+
+  '\\\'': task "fprintf(stdout,\"' - constant (character-constant)\\n\");" -state_pending;
+}
+
+state_octal_escape_sequence_character_constant1 char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7': task "fputc(s[*p],stdout);" -state_octal_escape_sequence_character_constant2;
+
+  '\\\'': task "fprintf(stdout,\"' - constant (character-constant)\\n\");" -state_pending;
+}
+
+state_octal_escape_sequence_character_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7': task "fputc(s[*p],stdout);" -state_octal_escape_sequence_character_constant1;
+
+  '\\\'': task "fprintf(stdout,\"' - constant (character-constant)\\n\");" -state_pending;
+}
+
+state_escape_sequence_character_constant char {
+  '\\\'':; '"':; '?':; '\\\\':; 'a':;
+  'b':; 'f':; 'n':; 'r':; 't':; 'v': -state_character_constant;
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7': task "fputc(s[*p],stdout);" -state_octal_escape_sequence_character_constant;
+
+  'x': task "fputc('x',stdout);" -state_hexadecimal_escape_sequence_character_constant;
+
+  'u': task "fputc(s[*p],stdout);" -state_u_universal_character_name_character_constant;
+
+  'U': task "fputc(s[*p],stdout);" -state_U_universal_character_name_character_constant;
+
+  *: task "fprintf(stderr, \"invalid escape-sequence \\\\%c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_character_constant char {
+  '\\\'': task "fprintf(stdout,\"' - constant (character-constant)\\n\");" -state_pending;
+
+  '\\\\': task "fputc('\\\\',stdout);" -state_escape_sequence_character_constant;
+
+  *: task "fputc(s[*p],stdout);" -state_character_constant;
+}
+
+state_maybe_hexadecimal_escape_sequence_string_literal char {
+  '\\\'':; '"':; '?':; '\\\\':; 'a':;
+  'b':; 'f':; 'n':; 'r':; 't':; 'v': -state_string_literal;
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7': task "fputc(s[*p],stdout);" -state_octal_escape_sequence_string_literal;
+
+  'x': task "fputc('x',stdout);" -state_hexadecimal_escape_sequence_string_literal;
+
+  'u': task "fputc(s[*p],stdout);" -state_u_universal_character_name_string_literal;
+
+  'U': task "fputc(s[*p],stdout);" -state_U_universal_character_name_string_literal;
+
+  *: task "fprintf(stderr, \"invalid escape-sequence \\\\%c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_rec_hexadecimal_escape_sequence_string_literal char {
+  '\\\\': task "fputc('\\\\',stdout);" -state_maybe_hexadecimal_escape_sequence_string_literal;
+
+  '"': task "fprintf(stdout,\"\\\" - string-literal\\n\");" -state_pending;
+
+  *: task "fputc(s[*p],stdout);" -state_string_literal;
+}
+
+state_hexadecimal_escape_sequence_string_literal char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_rec_hexadecimal_escape_sequence_string_literal;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_u_hex_quad_3_string_literal char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_string_literal;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_u_hex_quad_2_string_literal char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_u_hex_quad_3_string_literal;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_u_hex_quad_1_string_literal char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_u_hex_quad_2_string_literal;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_u_universal_character_name_string_literal char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_u_hex_quad_1_string_literal;
+
+  *: task "fprintf(stderr, \"expected a hex-quad; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_7_string_literal char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_string_literal;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_6_string_literal char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_7_string_literal;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_5_string_literal char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_6_string_literal;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_4_string_literal char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_5_string_literal;
+
+  *: task "fprintf(stderr, \"expected a hex-quad; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_3_string_literal char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_4_string_literal;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_2_string_literal char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_3_string_literal;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_1_string_literal char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_2_string_literal;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_universal_character_name_string_literal char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_1_string_literal;
+
+  *: task "fprintf(stderr, \"expected a hex-quad; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_octal_escape_sequence_string_literal2 char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7': task "fputc(s[*p],stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\"\\\" - string-literal\\n\");" -state_pending;
+}
+
+state_octal_escape_sequence_string_literal1 char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7': task "fputc(s[*p],stdout);" -state_octal_escape_sequence_string_literal2;
+
+  '\\\'': task "fprintf(stdout,\"\\\" - string-literal\\n\");" -state_pending;
+}
+
+state_octal_escape_sequence_string_literal char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7': task "fputc(s[*p],stdout);" -state_octal_escape_sequence_string_literal1;
+
+  '\\\'': task "fprintf(stdout,\"\\\" - string-literal\\n\");" -state_pending;
+}
+
+state_escape_sequence_string_literal char {
+  '\\\'':; '"':; '?':; '\\\\':; 'a':;
+  'b':; 'f':; 'n':; 'r':; 't':; 'v': -state_string_literal;
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7': task "fputc(s[*p],stdout);" -state_octal_escape_sequence_string_literal;
+
+  'x': task "fputc('x',stdout);" -state_hexadecimal_escape_sequence_string_literal;
+
+  'u': task "fputc(s[*p],stdout);" -state_u_universal_character_name_string_literal;
+
+  'U': task "fputc(s[*p],stdout);" -state_U_universal_character_name_string_literal;
+
+  *: task "fprintf(stderr, \"invalid escape-sequence \\\\%c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_string_literal char {
+  '"': task "fprintf(stdout,\"\\\" - string-literal\\n\");" -state_pending;
+
+  '\\\\': task "fputc('\\\\',stdout);" -state_escape_sequence_string_literal;
+
+  *: task "fputc(s[*p],stdout);" -state_string_literal;
+}
+
+state_ll_long_suffix char {
+  '"': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_l_long_suffix char {
+  'l': task "fputc('l',stdout);" -state_ll_long_suffix;
+
+  '"': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_LL_long_suffix char {
+  '"': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_L_long_suffix char {
+  'L': task "fputc('L',stdout);" -state_LL_long_suffix;
+
+  '"': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_floating_suffix char {
+  '"': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_exponent_part_digit_sequence char {
+  '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':;
+  '8':; '9': task "fputc(s[*p],stdout);" -state_exponent_part_digit_sequence;
+
+  'f':; 'l':; 'F':; 'L': task "fprintf(stdout,\"%c - constant (floating-constant)\\n\",s[*p]);" -state_floating_suffix;
+
+  '"': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '-': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_fractional_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':;
+  '8':; '9': task "fputc(s[*p],stdout);" -state_fractional_constant;
+
+  'f':; 'l':; 'F':; 'L': task "fprintf(stdout,\"%c - constant (floating-constant)\\n\",s[*p]);" -state_floating_suffix;
+
+  'e':; 'E': task "fputc(s[*p],stdout);" -state_exponent_part;
+
+  '"': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '-': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_exponent_part_at_least_one_digit char {
+  '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':;
+  '8':; '9': task "fputc('e',stdout);" task "fputc(s[*p],stdout);" -state_exponent_part_digit_sequence;
+
+  *: task "fprintf(stderr,\"expected a digit-sequence; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_exponent_part char {
+  '+':; '-': task "fputc(s[*p],stdout);" -state_exponent_part_at_least_one_digit;
+
+  '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':;
+  '8':; '9': task "fputc(s[*p],stdout);" -state_exponent_part_digit_sequence;
+
+  *: task "fprintf(stderr,\"expected a sign or a digit-sequence; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_decimal_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':;
+  '8':; '9': task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  'u':; 'U': task "fputc(s[*p],stdout);" -state_pending;
+
+  'l': task "fputc('l',stdout);" -state_l_long_suffix;
+
+  'L': task "fputc('L',stdout);" -state_L_long_suffix;
+
+  '.': task "fputc('.',stdout);" -state_fractional_constant;
+
+  'e':; 'E': task "fputc(s[*p],stdout);" -state_exponent_part;
+
+  '"': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '-': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_binary_exponent_part_digit_sequence char {
+  '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':;
+  '8':; '9': task "fputc(s[*p],stdout);" -state_binary_exponent_part_digit_sequence;
+
+  'f':; 'l':; 'F':; 'L': task "fprintf(stdout,\"%c - constant (floating-constant)\\n\",s[*p]);" -state_floating_suffix;
+
+  '"': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '-': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - constant (floating-constant)\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_hexadecimal_fractional_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':;
+  '8':; '9':; 'a':; 'b':; 'c':; 'd':; 'e':; 'f':;
+  'A':; 'B':; 'C':; 'D':; 'E':; 'F':  task "fputc(s[*p],stdout);" -state_hexadecimal_fractional_constant;
+
+  'p':; 'P': task "fputc(s[*p],stdout);" -state_binary_exponent_part;
+
+  *: task "fprintf(stderr,\"expected a digit-sequence, a `p', or a `P'; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_binary_exponent_part_at_least_one_digit char {
+  '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':;
+  '8':; '9': task "fputc('e',stdout);" task "fputc(s[*p],stdout);" -state_binary_exponent_part_digit_sequence;
+
+  *: task "fprintf(stderr,\"expected a digit-sequence; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_binary_exponent_part char {
+  '+':; '-': task "fputc(s[*p],stdout);" -state_binary_exponent_part_at_least_one_digit;
+
+  '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':;
+  '8':; '9': task "fputc(s[*p],stdout);" -state_binary_exponent_part_digit_sequence;
+
+  *: task "fprintf(stderr,\"expected a sign or a digit-sequence; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_hexadecimal_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':;
+  '8':; '9':; 'a':; 'b':; 'c':; 'd':; 'e':; 'f':;
+  'A':; 'B':; 'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_hexadecimal_constant;
+
+  'u':; 'U': task "fputc(s[*p],stdout);" -state_pending;
+
+  'l': task "fputc('l',stdout);" -state_l_long_suffix;
+
+  'L': task "fputc('L',stdout);" -state_L_long_suffix;
+
+  '.': task "fputc('.',stdout);" -state_hexadecimal_fractional_constant;
+
+  'p':; 'P': task "fputc(s[*p],stdout);" -state_binary_exponent_part;
+
+  '"': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '-': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_octal_constant char {
+  '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7': task "fputc(s[*p],stdout);" -state_octal_constant;
+
+  'u':; 'U': task "fputc(s[*p],stdout);" -state_pending;
+
+  'l': task "fputc('l',stdout);" -state_l_long_suffix;
+
+  'L': task "fputc('L',stdout);" -state_L_long_suffix;
+
+  '"': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '-': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_hexadecimal_constant_at_least_one_hexadecimal_digit char {
+  '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':;
+  '8':; '9':; 'a':; 'b':; 'c':; 'd':; 'e':; 'f':;
+  'A':; 'B':; 'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_hexadecimal_constant;
+
+  *: task "fprintf(stderr,\"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_octal_or_hexadecimal_constant char {
+  'x':; 'X': task "fputc(s[*p],stdout);" -state_hexadecimal_constant_at_least_one_hexadecimal_digit;
+
+  '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7': task "fputc('0',stdout);" task "fputc(s[*p],stdout);" -state_octal_constant;
+
+  'u':; 'U': task "fputc(s[*p],stdout);" task "fputc('0',stdout);" -state_pending;
+
+  'l': task "fputc('l',stdout);" task "fputc('0',stdout);" -state_l_long_suffix;
+
+  'L': task "fputc('L',stdout);" task "fputc('0',stdout);" -state_L_long_suffix;
+
+  '"': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '-': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_punctuator_div;
+
+  '>': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fputc('0',stdout);" task "fprintf(stdout,\" - constant (integer-constant)\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_three_dots char {
+  '.': task "fprintf(stdout,\".. - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n. - punctuator\\n\",s[*p]);" -state_pending;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n. - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_dot char {
+  '.': -state_punctuator_three_dots;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0':; '1':; '2':; '3':; '4':; '5':; '6':; '7':;
+  '8':; '9': task "fputc(s[*p],stdout);" -state_fractional_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_minus char {
+  '-': task "fprintf(stdout,\"- - punctuator\\n\");" -state_pending;
+  '>': task "fprintf(stdout,\"> - punctuator\\n\");" -state_pending;
+  '=': task "fprintf(stdout,\"= - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_plus char {
+  '+': task "fprintf(stdout,\"+ - punctuator\\n\");" -state_pending;
+  '=': task "fprintf(stdout,\"= - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_amp char {
+  '&': task "fprintf(stdout,\"& - punctuator\\n\");" -state_pending;
+  '=': task "fprintf(stdout,\"= - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_wildcard char {
+  '=': task "fprintf(stdout,\"= - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_bang char {
+  '=': task "fprintf(stdout,\"= - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_alt_double_pound char {
+  ':': task "fprintf(stdout,\"%%: - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_alt_pound char {
+  '%': -state_alt_double_pound;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_rem char {
+  '=': task "fprintf(stdout,\"= - punctuator\\n\");" -state_pending;
+  '>': task "fprintf(stdout,\"> - punctuator\\n\");" -state_pending;
+  ':': task "fputc(':',stdout);" -state_alt_pound;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_div char {
+  '=': task "fprintf(stdout,\"/= - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fprintf(stdout,\"%c/ - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': -state_multiline_comment;
+
+  '!': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': -state_singleline_comment;
+
+  '>': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  ':': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\"/ - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\"/ - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_lshft char {
+  '=': task "fprintf(stdout,\"= - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_gt char {
+  '>': task "fputc('>',stdout);" -state_rshft;
+  '=': task "fprintf(stdout,\"= - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_rshft char {
+  '=': task "fprintf(stdout,\"= - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_ls char {
+  '<': task "fputc('<',stdout);" -state_lshft;
+  '=': task "fprintf(stdout,\"= - punctuator\\n\");" -state_pending;
+  '%': task "fprintf(stdout,\"%% - punctuator\\n\");" -state_pending;
+  ':': task "fprintf(stdout,\": - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_pipe char {
+  '|': task "fprintf(stdout,\"| - punctuator\\n\");" -state_pending;
+  '=': task "fprintf(stdout,\"= - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_xor char {
+  '=': task "fprintf(stdout,\"= - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_equal char {
+  '=': task "fprintf(stdout,\"= - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_colon char {
+  '>': task "fprintf(stdout,\"> - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  '#': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_punctuator_pound char {
+  '#': task "fprintf(stdout,\"# - punctuator\\n\");" -state_pending;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_identifier;
+
+  '0': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '"': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - punctuator\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - punctuator\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '\\\\': task "fprintf(stdout,\" - punctuator\\n\");" task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - punctuator\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_identifier char {
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'u':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'L':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'U':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_':; '0':; '1':; '2':; '3':; '4':; '5':; '6':;
+  '7':; '8':; '9': task "fputc(s[*p],stdout);" -state_identifier;
+
+  '\\\\': task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '"': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('\\\'',stdout);" -state_character_constant;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\" - identifier\\n\");" task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': task "fprintf(stdout,\" - identifier\\n\");" -state_punctuator_div;
+
+  '>': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fprintf(stdout,\" - identifier\\n\");" task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fprintf(stdout,\" - identifier\\n\");" task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\n':; ' ':; '\\t': task "fprintf(stdout,\" - identifier\\n\");" -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_u_hex_quad_3_identifier char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_identifier;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_u_hex_quad_2_identifier char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_u_hex_quad_3_identifier;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_u_hex_quad_1_identifier char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_u_hex_quad_2_identifier;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_u_universal_character_name_identifier char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_u_hex_quad_1_identifier;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_7_identifier char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_identifier;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_6_identifier char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_7_identifier;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_5_identifier char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_6_identifier;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_4_identifier char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_5_identifier;
+
+  *: task "fprintf(stderr, \"expected a hex-quad; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_3_identifier char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_4_identifier;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_2_identifier char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_3_identifier;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_hex_quad_1_identifier char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_2_identifier;
+
+  *: task "fprintf(stderr, \"expected a hexadecimal-digit; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_U_universal_character_name_identifier char {
+  '0':; '1':; '2':; '3':; '4':; '5':;
+  '6':; '7':; '8':; '9':; 'a':; 'b':;
+  'c':; 'd':; 'e':; 'f':; 'A':; 'B':;
+  'C':; 'D':; 'E':; 'F': task "fputc(s[*p],stdout);" -state_U_hex_quad_1_identifier;
+
+  *: task "fprintf(stderr, \"expected a hex-quad; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_maybe_universal_character_name_identifier char {
+  'u': task "fputc('u',stdout);" -state_u_universal_character_name_identifier;
+  'U': task "fputc('U',stdout);" -state_U_universal_character_name_identifier;
+  *: task "fprintf(stderr,\"expected either a 'u' or a 'U'; found %c instead\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_pending char {
+  '"': task "fputc('\"',stdout);" -state_string_literal;
+
+  '\\\'': task "fputc('\\\'',stdout);" -state_character_constant;
+
+  'u': task "fputc('u',stdout);" -state_encoding_prefix_u;
+
+  'U':; 'L': task "fputc(s[*p],stdout);" -state_encoding_prefix;
+
+  'a':; 'b':; 'c':; 'd':; 'e':; 'f':; 'g':; 'h':;
+  'i':; 'j':; 'k':; 'l':; 'm':; 'n':; 'o':; 'p':;
+  'q':; 'r':; 's':; 't':; 'v':; 'w':; 'x':; 'y':;
+  'z':; 'A':; 'B':; 'C':; 'D':; 'E':; 'F':; 'G':;
+  'H':; 'I':; 'J':; 'K':; 'M':; 'N':; 'O':; 'P':; 'Q':;
+  'R':; 'S':; 'T':; 'V':; 'W':; 'X':; 'Y':; 'Z':;
+  '_': task "fputc(s[*p],stdout);" -state_identifier;
+
+  '\\\\': task "fputc('\\\\',stdout);" -state_maybe_universal_character_name_identifier;
+
+  '0': task "fputc('0',stdout);" -state_octal_or_hexadecimal_constant;
+
+  '1':; '2':; '3':; '4':; '5':; '6':; '7':; '8':;
+  '9': task "fputc(s[*p],stdout);" -state_decimal_constant;
+
+  '[':; ']':; '(':; ')':; '{':; '}':; '~':; ',':; ';':; '?': task "fprintf(stdout,\"%c - punctuator\\n\",s[*p]);" -state_pending;
+
+  '.': task "fputc('.',stdout);" -state_punctuator_dot;
+
+  '-': task "fputc('-',stdout);" -state_punctuator_minus;
+
+  '+': task "fputc('+',stdout);" -state_punctuator_plus;
+
+  '&': task "fputc('&',stdout);" -state_punctuator_amp;
+
+  '*': task "fputc('*',stdout);" -state_punctuator_wildcard;
+
+  '!': task "fputc('!',stdout);" -state_punctuator_bang;
+
+  '%': task "fputc('%',stdout);" -state_punctuator_rem;
+
+  '/': -state_punctuator_div;
+
+  '>': task "fputc('>',stdout);" -state_punctuator_gt;
+
+  '<': task "fputc('<',stdout);" -state_punctuator_ls;
+
+  '|': task "fputc('|',stdout);" -state_punctuator_pipe;
+
+  '^': task "fputc('^',stdout);" -state_punctuator_xor;
+
+  '=': task "fputc('=',stdout);" -state_punctuator_equal;
+
+  ':': task "fputc(':',stdout);" -state_punctuator_colon;
+
+  '#': task "fputc('#',stdout);" -state_punctuator_pound;
+
+  '\\n':; ' ':; '\\t': -state_pending;
+
+  *: task "fprintf(stderr,\"unexpected character %c\\n\",s[*p]);" -state_lex_failed;
+}
+
+state_singleline_comment char {
+  '\\n': -state_pending;
+  *: -state_singleline_comment;
+}
+
+state_multiline_comment_possible_end char {
+  '/': -state_pending;
+  *: -state_multiline_comment;
+}
+
+state_multiline_comment char {
+  '*': -state_multiline_comment_possible_end;
+  *: -state_multiline_comment;
+}
+
+task
+"int main(void){
+  char s[4096];
+  size_t buf_len;
+  unsigned int state=state_pending;
+  while((buf_len=fread(s,1,4096,stdin))!=0){
+    if(ferror(stdin)){
+      perror(\"\");
+      return 1;
+    }
+    size_t start_at=0;
+    _s42_char(s,&start_at,buf_len,&state);
+  }
+  if(ferror(stdin)){
+    perror(\"\");
+    return 1;
+  }
+  if(state!=state_pending && state!=state_lex_failed){
+    fprintf(stderr,\"source file ends in partial token\\n\");
+    return 1;
+  }
+}"
