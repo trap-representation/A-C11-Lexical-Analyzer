@@ -202,6 +202,8 @@ state_rec_hexadecimal_escape_sequence_character_constant char {
 
   '\\\'': task "fprintf(stdout,\"' - constant (character-constant)\\n\");" -state_pending;
 
+  '\\n': task "fprintf(stderr,\"expected a c-char-sequence; found the new-line character instead\\n\");" -state_lex_failed;
+
   *: task "fputc(s[*p],stdout);" -state_character_constant;
 }
 
@@ -363,6 +365,8 @@ state_character_constant char {
 
   '\\\\': task "fputc('\\\\',stdout);" -state_escape_sequence_character_constant;
 
+  '\\n': task "fprintf(stderr,\"expected a c-char-sequence; found the new-line character instead\\n\");" -state_lex_failed;
+
   *: task "fputc(s[*p],stdout);" -state_character_constant;
 }
 
@@ -385,6 +389,8 @@ state_rec_hexadecimal_escape_sequence_string_literal char {
   '\\\\': task "fputc('\\\\',stdout);" -state_maybe_hexadecimal_escape_sequence_string_literal;
 
   '"': task "fprintf(stdout,\"\\\" - string-literal\\n\");" -state_pending;
+
+  '\\n': task "fprintf(stderr,\"expected a s-char-sequence; found the new-line character instead\\n\");" -state_lex_failed;
 
   *: task "fputc(s[*p],stdout);" -state_string_literal;
 }
@@ -546,6 +552,8 @@ state_string_literal char {
   '"': task "fprintf(stdout,\"\\\" - string-literal\\n\");" -state_pending;
 
   '\\\\': task "fputc('\\\\',stdout);" -state_escape_sequence_string_literal;
+
+  '\\n': task "fprintf(stderr,\"expected a s-char-sequence; found the new-line character instead\\n\");" -state_lex_failed;
 
   *: task "fputc(s[*p],stdout);" -state_string_literal;
 }
