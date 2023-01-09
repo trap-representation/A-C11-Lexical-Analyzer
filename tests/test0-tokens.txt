@@ -1,0 +1,77 @@
+int - identifier
+main - identifier
+( - punctuator
+void - identifier
+) - punctuator
+{ - punctuator
+int - identifier
+an_integer_constant - identifier
+= - punctuator
+42 - constant (integer-constant)
+; - punctuator
+long - identifier
+another_integer_constant - identifier
+= - punctuator
+0xF00L - constant (integer-constant)
+; - punctuator
+float - identifier
+a_hexadecimal_floating_constant - identifier
+= - punctuator
+0xabc.12p0 - constant (floating-constant)
+; - punctuator
+float - identifier
+a_decimal_floating_constant - identifier
+= - punctuator
+1.8e8 - constant (floating-constant)
+; - punctuator
+char - identifier
+* - punctuator
+a_string_literal - identifier
+= - punctuator
+"hi there" - string-literal
+; - punctuator
+char - identifier
+* - punctuator
+a_string_literal_with_escape_sequence - identifier
+= - punctuator
+"hello\world\xB\xf" - string-literal
+; - punctuator
+char - identifier
+* - punctuator
+a_utf_8_string_literal - identifier
+= - punctuator
+u8"I'm a string literal" - string-literal
+; - punctuator
+char - identifier
+a_character_constant - identifier
+= - punctuator
+'a' - constant (character-constant)
+; - punctuator
+char - identifier
+another_character_constant - identifier
+= - punctuator
+u'b' - constant (character-constant)
+; - punctuator
+a_character_constant - identifier
+++ - punctuator
+; - punctuator
+a_character_constant - identifier
+-- - punctuator
+; - punctuator
+a_character_constant - identifier
++= - punctuator
+2 - constant (integer-constant)
+; - punctuator
+int - identifier
+foo\u00bar - identifier
+= - punctuator
+22 - constant (integer-constant)
+/ - punctuator
+7 - constant (integer-constant)
+; - punctuator
+int - identifier
+an_identifier_with_a_universal_character_name - identifier
+= - punctuator
+foo\u00bar - identifier
+; - punctuator
+} - punctuator
